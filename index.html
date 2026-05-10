@@ -1,32 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>RU units 展示</title>
     <meta charset="utf-8" />
-    <title>My Map</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        #map { height: 100vh; }
+        #map { height: 100vh; width: 100%; margin: 0; }
+        body { margin: 0; }
     </style>
 </head>
 <body>
 
-<div id="map"></div>
+    <div id="map"></div>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-    var map = L.map('map').setView([30, 114], 5);
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // 1. 初始化地图（初始坐标不重要，后面会动态调整）
+        var map = L.map('map').setView([0, 0], 2);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
+        // 2. 添加底图
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
-    // 加载你的GeoJSON
-    fetch('data/map.geojson')
-        .then(res => res.json())
-        .then(data => {
-            L.geoJSON(data).addTo(map);
-        });
-</script>
+        // 3. 加载并展示你的 GeoJSON 文件
+        // 注意：文件名如果包含空格，建议重命名为 ru_units_26_5_8.geojson 
+        // 或者在 fetch 中使用正确的文件名
+        fetch('ru_units_26-5-8.geojson')
+            .then(response => response.json())
+            .then(data => {
+                // 创建 GeoJSON 图层
+                var geoLayer = L.geoJSON(data, {
+                    style: function (feature) {
+                        return {
+                            color: "#ff7800", // 边框颜色
+                            weight: 2,        // 边框粗细
+                            opacity: 1,       // 边框透明度
+                            fillColor: "#ff7800", // 填充颜色
+                            fillOpacity: 0.3      // 填充透明度
+                        };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        // 如果数据里有属性信息，点击时显示名称
+                        layer.bindPopup("要素名称: RU units 26-5-8");
+                    }
+                }).addTo(map);
 
+                // 4. 重要：自动缩放地图以适应这个面要素的边界
+                map.fitBounds(geoLayer.getBounds());
+            })
+            .catch(error => console.error('加载 GeoJSON 出错:', error));
+    </script>
 </body>
 </html>
